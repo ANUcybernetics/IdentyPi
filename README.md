@@ -50,4 +50,4 @@ The usual setup is inverted: instead of a human wiring carefully and documenting
 
 ## Going forward
 - What if we restrict it to a smaller number of components? Could we plug the components into a pi 5 that runs an agent on boot and which has a local copy of all the documentation required.
-- Instead of the pi's own camera pointing down onto the initial wiring, why not build an agentic nursery by giving the agent access to a camera pointed at a pen in which we have a freshly wired robot that the agent can control through SSH? The agent should be able to figure out how these bots can be moved around regardless of what form of locomotion they use.
+- Instead of the pi's own camera pointing down onto the initial wiring, why not build an agentic nursery by giving the agent access to a camera pointed at a pen in which we have a freshly wired robot that the agent can control through SSH? The agent should be able to figure out how these bots can be moved around regardless of what form of locomotion they use. This is a bit like my [Wayward Robot Refuge](https://github.com/bill-mca/SIBAnetics/blob/docs/Group_Build_Design_Criteria.md#wayward-robot-refuge-) idea. 
