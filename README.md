@@ -38,6 +38,11 @@ The goal is a repo that provides two things:
 
 The usual setup is inverted: instead of a human wiring carefully and documenting pins for the AI, the AI must build an accurate model of attached peripherals by probing. It's a closed sensorimotor loop to investigate a question — *can we use agents to abstract all the understanding of the workings of hardware?* 
 
+## Two documents
+
+- **README.md** (this file) — for humans only. It tells the whole plot, including everything the agent must discover for itself (the camera, the monitor, the traps). **Never let this file reach the Pi.**
+- **[PI.md](PI.md)** — the only document the machine gets: the task, the diary protocol, and the ask-a-human rule. Spoiler-free by design; it goes on the Pi as its `CLAUDE.md`.
+
 ## Build-day checklist
 
 - [ ] Pi flashed, on network, SSH enabled
