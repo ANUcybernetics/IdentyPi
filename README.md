@@ -48,9 +48,10 @@ The usual setup is inverted: instead of a human wiring carefully and documenting
 - **Any protocol, digital sensors generally** — output-to-output shorts (two things actively driving the same pin) are the generic risk. Annoying, heat-generating, rarely instantly fatal on 3.3V CMOS.
 - **The one true landmine: 5V-logic devices.** Most breakout boards from the Arduino world are 5V logic, not 3.3V-native — often true even when the datasheet buries it. A 5V signal on *any* Pi GPIO pin, on any line, in any protocol, is not something the agent can "discover gracefully" — it risks silently degrading or killing that GPIO, potentially taking a whole bank with it via the shared 3.3V rail. This is a build-time check, not a let-the-agent-find-out situation: **only 3.3V-native boards go on GPIO**, full stop, checked before power-on.
 
-## Two documents
+## Three documents
 
 - **README.md** (this file) — for humans only. It tells the whole plot, including everything the agent must discover for itself (the camera, the monitor, the traps). **Never let this file reach the Pi.**
+- **[WIRING.md](WIRING.md)** — the concrete pin-by-pin build plan. Also humans only, also never goes near the Pi.
 - **[PI.md](PI.md)** — the only document the machine gets: the task, the diary protocol, and the ask-a-human rule. Spoiler-free by design; it goes on the Pi as its `CLAUDE.md`.
 
 ## Build-day checklist
