@@ -38,6 +38,16 @@ The goal is a repo that provides two things:
 
 The usual setup is inverted: instead of a human wiring carefully and documenting pins for the AI, the AI must build an accurate model of attached peripherals by probing. It's a closed sensorimotor loop to investigate a question — *can we use agents to abstract all the understanding of the workings of hardware?* 
 
+## Wiring landmines (for whoever builds it)
+
+"Pay attention to power" needs to be sharper than just the 3.3V rail. Protocol by protocol:
+
+- **I2C (SDA/SCL)** — fairly forgiving. Both lines are open-drain with pull-ups, so swapping SDA/SCL or landing on the wrong pin usually just fails to enumerate (nothing shows in `i2cdetect`) rather than damaging anything, *as long as everything involved is 3.3V logic*.
+- **SPI (MOSI/MISO/SCLK/CS)** — push-pull, less forgiving than I2C. A random wiring that ends up with two active outputs on the same line (e.g. a sensor output landing on a pin already driven elsewhere) causes a current fight — not usually fatal at low duty, but a real risk over hours of operation.
+- **UART (TX/RX)** — safest of the bunch. Swapped TX/RX just means silence, no contention.
+- **Any protocol, digital sensors generally** — output-to-output shorts (two things actively driving the same pin) are the generic risk. Annoying, heat-generating, rarely instantly fatal on 3.3V CMOS.
+- **The one true landmine: 5V-logic devices.** Most breakout boards from the Arduino world are 5V logic, not 3.3V-native — often true even when the datasheet buries it. A 5V signal on *any* Pi GPIO pin, on any line, in any protocol, is not something the agent can "discover gracefully" — it risks silently degrading or killing that GPIO, potentially taking a whole bank with it via the shared 3.3V rail. This is a build-time check, not a let-the-agent-find-out situation: **only 3.3V-native boards go on GPIO**, full stop, checked before power-on.
+
 ## Two documents
 
 - **README.md** (this file) — for humans only. It tells the whole plot, including everything the agent must discover for itself (the camera, the monitor, the traps). **Never let this file reach the Pi.**
