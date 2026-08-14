@@ -46,6 +46,16 @@ Not real SPI (no MISO, it's a shift-register protocol) — deliberately kept off
 
 Note: MAX7219 nominally wants closer to 5V for full brightness. At 3.3V it should still register/respond, just possibly dim — not a safety issue, just a "why won't this fully light up" puzzle rather than a landmine.
 
+### 1-Wire — DS18B20 temperature sensor
+
+Genuinely different protocol from everything else on this board — single data line, not a bus shared with I2C, and it won't enumerate at all without the `w1-gpio` kernel overlay loaded, which defaults to expecting the data line on GPIO4. Since GPIO4 is already taken (TEMT6000), the overlay needs its `gpiopin=` parameter set explicitly rather than relying on the default.
+
+| Signal | GPIO (BCM) | Physical pin | Notes |
+|---|---|---|---|
+| DS18B20 data | GPIO7 | 26 | needs `dtoverlay=w1-gpio,gpiopin=7` in config.txt; needs a 4.7kΩ pull-up between data and 3.3V unless the specific breakout already has one onboard |
+
+This was the last fully free general-purpose GPIO in the plan — everything else in the random bucket below is now spoken for.
+
 ### Scattered digital/PWM/analog GPIO (the "random" bucket)
 
 | Device | Signal | GPIO (BCM) | Physical pin |
@@ -101,6 +111,7 @@ Not a killer to add later — pins below are reserved now so nothing in Phase 1 
 - [x] Full Phase 1 parts identified from photo, pin plan drafted (this file)
 - [x] Phase 2 pins pre-reserved for mux/OLEDs
 - [x] Duinotech IR proximity sensor logic voltage confirmed (3.3V rail, safe)
+- [x] DS18B20 1-Wire thermometer added to Phase 1 (GPIO7, last free general-purpose pin)
 - [ ] Decide ESP32 firmware wipe vs. thin stub (see subsystem section above)
 - [ ] Physical wiring — Phase 1
 - [ ] Camera + monitor layout dry-run (check focus/framing before fixing in place)
