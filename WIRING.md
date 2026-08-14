@@ -56,7 +56,7 @@ Note: MAX7219 nominally wants closer to 5V for full brightness. At 3.3V it shoul
 | Keyestudio joystick | Y axis (analog — **dead end, no ADC**) | GPIO23 | 16 |
 | TowerPro SG92R servo | PWM signal | GPIO18 | 12 |
 | Keyestudio 3W LED module | PWM/digital signal | GPIO24 | 18 |
-| Duinotech IR proximity (E18-D80NK barrel) | digital out | GPIO25 | 22 |
+| Duinotech IR proximity (E18-D80NK barrel) | digital out, **power from 3.3V rail** (PNP output tracks VCC — spec confirms 3–5V operating range, so 3.3V keeps output logic safe with no level shifter) | GPIO25 | 22 |
 | Keyestudio TEMT6000 | analog out (**dead end, no ADC**) | GPIO4 | 7 |
 | Keyestudio cap touch module | digital out | GPIO5 | 29 |
 | Piezo buzzer | digital out | GPIO6 | 31 |
@@ -93,14 +93,14 @@ Not a killer to add later — pins below are reserved now so nothing in Phase 1 
 
 - **Common ground, always.** Anything powered from an external supply (servo, LED driver board, any 5V-rail sensor) must share ground with the Pi, or its digital signal is meaningless even if the voltage levels are otherwise fine.
 - **Servo and 3W LED module get their own external power**, never the Pi's 5V or 3.3V rail — both can pull more current than the Pi's regulator is meant to supply, especially the servo under load.
-- Confirm Duinotech IR proximity sensor's output voltage before connecting — check whether it can run at 3.3V, or add a level shifter if not (see landmines section in README.md).
+- Duinotech IR proximity sensor: datasheet confirms 3–5V operating range with PNP digital output, so power it from 3.3V and its HIGH output stays safely at 3.3V logic — no level shifter needed.
 
 ## Status
 
 - [x] Ultrasonic dropped
 - [x] Full Phase 1 parts identified from photo, pin plan drafted (this file)
 - [x] Phase 2 pins pre-reserved for mux/OLEDs
-- [ ] Confirm Duinotech IR proximity sensor logic voltage
+- [x] Duinotech IR proximity sensor logic voltage confirmed (3.3V rail, safe)
 - [ ] Decide ESP32 firmware wipe vs. thin stub (see subsystem section above)
 - [ ] Physical wiring — Phase 1
 - [ ] Camera + monitor layout dry-run (check focus/framing before fixing in place)
