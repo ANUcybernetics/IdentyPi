@@ -21,6 +21,9 @@ No duplicate addresses in Phase 1, so everything sits directly on the bus — no
 | APDS-9960 (Adafruit breakout — gesture/proximity/light) | 0x39 | direct on bus |
 | HuskyLens | 0x32 | direct on bus — **must set its onboard protocol switch to I2C mode first**, it doesn't default there |
 | PiicoDev RFID Module | 0x2C (default, switchable 0x2C–0x2F) | direct on bus |
+| TCA9548A multiplexer | 0x70 | direct on bus |
+| OLED 1.3" | address unconfirmed | **route through mux (channel 0)** until confirmed via `i2cdetect` — 1.3" and 1.5" panels may or may not share a default address |
+| OLED 1.5" | address unconfirmed | **route through mux (channel 1)** until confirmed via `i2cdetect` |
 
 ### SPI0 — epaper screen (WeAct 4.2")
 
@@ -74,6 +77,20 @@ This was the last fully free general-purpose GPIO in the plan — everything els
 
 Analog dead ends are wired anyway rather than left off the desk — the agent finding a live GPIO pin that reads pure noise, and working out *why*, is part of the exercise.
 
+### Relay module (SRD-03VDC-SL-C, single channel) — read the safety note before wiring
+
+**This is a mains-rated relay (10A @ 125VAC / 240VAC on the switched contacts) — categorically different risk from everything else in this build.** Every other device here is 3.3–5V logic; the worst case elsewhere is a damaged GPIO pin. If the relay's switched terminals are ever connected to a real mains-powered load, an agent triggering it unpredictably becomes a genuine electrical safety issue, not a component-damage one.
+
+**Rule for this project: the switched side stays disconnected, or wired only to something trivially safe (small 12V fan, LED, nothing) for the entire agent-exploration phase.** The relay's audible click and onboard indicator LED are enough to prove the agent successfully controlled an actuator — mains switching for a real purpose is a separate, deliberately human-supervised job, not something to leave for blind discovery.
+
+Practically: the coil is 3V, low current (~80mA), so the module's VCC can run off the Pi's 3.3V rail. The IN/trigger pin is logic-level — **many boards like this are active-LOW** (pulling the pin low energizes the relay), worth confirming once wired since a floating/unconfigured GPIO at boot could otherwise cause a spurious click before any code runs.
+
+Every general-purpose GPIO in this plan is already spoken for (GPIO7 was the last free one, used by the DS18B20 above). To fit the relay trigger in, free up GPIO14 by disabling the Pi's serial console — `raspi-config` → Interface Options → Serial Port → login shell **off**, hardware **on**. This turns GPIO14/15 back into ordinary GPIO without needing to touch anything already assigned.
+
+| Signal | GPIO (BCM) | Physical pin | Notes |
+|---|---|---|---|
+| Relay IN (trigger) | GPIO14 | 8 | requires disabling serial console first; GPIO15 (pin 10) is then a spare |
+
 ### Nested subsystem — ESP32 SuperMini + 2x MPU-6050 (via USB, from Groundskeeper)
 
 Not wired to Pi GPIO at all — connects over USB, enumerates as a serial device. The two MPU-6050s live on the ESP32's own I2C bus, not the Pi's (one at default address 0x68, the other with AD0 tied high → 0x69 — no mux needed even for two identical sensors, since the address pin resolves the collision at the hardware level).
@@ -88,32 +105,31 @@ Confirmed physical orientation: **the Pi's HDMI ports face toward the Pi Camera,
 
 Practical note: both cameras are **fixed-focus, not macro** — the Pi Camera v2.1's lens is tuned roughly 1m-to-infinity, HuskyLens similar. Up close on a cluttered desk of wiring, images will likely be soft. Do a live dry-run of both feeds before gluing anything down.
 
-## Phase 2 — not yet acquired, pins reserved
+## Phase 2 — not yet acquired
 
-Not a killer to add later — pins below are reserved now so nothing in Phase 1 needs to move.
-
-| Device | Address / Signal | Notes |
-|---|---|---|
-| TCA9548A multiplexer | 0x70 | joins the Phase 1 I2C devices once acquired |
-| OLED #1 | 0x3C (typical SSD1306) | direct on bus, verify once part confirmed |
-| OLED #2 | unknown yet | route through mux (channel 6) by default in case it shares 0x3C with OLED #1 |
-| "bunch of temp sensors" (identical, duplicate address) | same address as each other | one per mux channel (0, 1, 2, …) |
+| Device | Notes |
+|---|---|
+| "bunch of temp sensors" (identical, duplicate address) | one per mux channel (2, 3, 4, …) once acquired — mux itself is already in Phase 1 |
 
 ## General wiring rules
 
 - **Common ground, always.** Anything powered from an external supply (servo, LED driver board, any 5V-rail sensor) must share ground with the Pi, or its digital signal is meaningless even if the voltage levels are otherwise fine.
 - **Servo and 3W LED module get their own external power**, never the Pi's 5V or 3.3V rail — both can pull more current than the Pi's regulator is meant to supply, especially the servo under load.
 - Duinotech IR proximity sensor: datasheet confirms 3–5V operating range with PNP digital output, so power it from 3.3V and its HIGH output stays safely at 3.3V logic — no level shifter needed.
+- **Relay module: switched side stays unloaded or on a trivially safe load for the whole agent-exploration phase — no mains, ever, during that phase.** See relay section above.
 
 ## Status
 
 - [x] Ultrasonic dropped
 - [x] Full Phase 1 parts identified from photo, pin plan drafted (this file)
-- [x] Phase 2 pins pre-reserved for mux/OLEDs
 - [x] Duinotech IR proximity sensor logic voltage confirmed (3.3V rail, safe)
 - [x] DS18B20 1-Wire thermometer added to Phase 1 (GPIO7, last free general-purpose pin)
+- [x] Mux + 2x OLED (1.3", 1.5") + relay found, moved into Phase 1
+- [ ] Confirm actual I2C addresses of both OLEDs via `i2cdetect` (currently both routed through mux as a safe default)
+- [ ] Confirm relay active-high vs active-low before wiring
+- [ ] Disable serial console (`raspi-config`) to free GPIO14 for the relay trigger
 - [ ] Decide ESP32 firmware wipe vs. thin stub (see subsystem section above)
 - [ ] Physical wiring — Phase 1
 - [ ] Camera + monitor layout dry-run (check focus/framing before fixing in place)
 - [ ] PI.md copied onto the Pi as CLAUDE.md, README/WIRING kept off it
-- [ ] Phase 2 parts acquired and wired in when ready
+- [ ] Phase 2 (duplicate temp sensors) wired in when ready

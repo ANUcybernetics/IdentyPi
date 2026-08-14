@@ -47,6 +47,7 @@ The usual setup is inverted: instead of a human wiring carefully and documenting
 - **UART (TX/RX)** — safest of the bunch. Swapped TX/RX just means silence, no contention.
 - **Any protocol, digital sensors generally** — output-to-output shorts (two things actively driving the same pin) are the generic risk. Annoying, heat-generating, rarely instantly fatal on 3.3V CMOS.
 - **The one true landmine: 5V-logic devices.** Most breakout boards from the Arduino world are 5V logic, not 3.3V-native — often true even when the datasheet buries it. A 5V signal on *any* Pi GPIO pin, on any line, in any protocol, is not something the agent can "discover gracefully" — it risks silently degrading or killing that GPIO, potentially taking a whole bank with it via the shared 3.3V rail. This is a build-time check, not a let-the-agent-find-out situation: **only 3.3V-native boards go on GPIO**, full stop, checked before power-on.
+- **The mains-relay landmine, a different category entirely.** If a relay module rated for mains voltage is in the build (as of the current WIRING.md, an SRD-03VDC-SL-C is), everything above is about component damage — this one is about electrical safety if it's ever wired to a real mains-powered load. The switched side stays disconnected or on a trivially safe low-voltage load for the entire agent-exploration phase, full stop. Mains switching for a real purpose is a deliberate, human-supervised job done separately, never something left for an undocumented agent to discover by triggering pins.
 
 ## Three documents
 
