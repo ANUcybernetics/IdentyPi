@@ -69,13 +69,14 @@ This was the last fully free general-purpose GPIO in the plan — everything els
 | Keyestudio joystick | Y axis (analog — **dead end, no ADC**) | GPIO23 | 16 |
 | TowerPro SG92R servo | PWM signal | GPIO18 | 12 |
 | Keyestudio 3W LED module | PWM/digital signal | GPIO24 | 18 |
-| Duinotech IR proximity (E18-D80NK barrel) | digital out, **power from 3.3V rail** (PNP output tracks VCC — spec confirms 3–5V operating range, so 3.3V keeps output logic safe with no level shifter) | GPIO25 | 22 |
 | Keyestudio TEMT6000 | analog out (**dead end, no ADC**) | GPIO4 | 7 |
 | Keyestudio cap touch module | digital out | GPIO5 | 29 |
 | Piezo buzzer | digital out | GPIO6 | 31 |
 | Keyestudio IR module (IR_01, 3-pin: VCC/GND/OUT) | digital out | GPIO13 | 33 |
 
 Analog dead ends are wired anyway rather than left off the desk — the agent finding a live GPIO pin that reads pure noise, and working out *why*, is part of the exercise.
+
+GPIO25 (pin 22) is now free — the Duinotech IR proximity sensor it was reserved for turned out not to be on hand, dropped 2026-07-28.
 
 ### Relay module (SRD-03VDC-SL-C, single channel) — read the safety note before wiring
 
@@ -115,14 +116,13 @@ Practical note: both cameras are **fixed-focus, not macro** — the Pi Camera v2
 
 - **Common ground, always.** Anything powered from an external supply (servo, LED driver board, any 5V-rail sensor) must share ground with the Pi, or its digital signal is meaningless even if the voltage levels are otherwise fine.
 - **Servo and 3W LED module get their own external power**, never the Pi's 5V or 3.3V rail — both can pull more current than the Pi's regulator is meant to supply, especially the servo under load.
-- Duinotech IR proximity sensor: datasheet confirms 3–5V operating range with PNP digital output, so power it from 3.3V and its HIGH output stays safely at 3.3V logic — no level shifter needed.
 - **Relay module: switched side stays unloaded or on a trivially safe load for the whole agent-exploration phase — no mains, ever, during that phase.** See relay section above.
 
 ## Status
 
 - [x] Ultrasonic dropped
 - [x] Full Phase 1 parts identified from photo, pin plan drafted (this file)
-- [x] Duinotech IR proximity sensor logic voltage confirmed (3.3V rail, safe)
+- [x] Duinotech IR proximity sensor dropped — not actually on hand (GPIO25/pin 22 now free)
 - [x] DS18B20 1-Wire thermometer added to Phase 1 (GPIO7, last free general-purpose pin)
 - [x] Mux + 2x OLED (1.3", 1.5") + relay found, moved into Phase 1
 - [ ] Confirm actual I2C addresses of both OLEDs via `i2cdetect` (currently both routed through mux as a safe default)
