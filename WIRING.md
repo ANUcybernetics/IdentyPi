@@ -6,6 +6,8 @@ Bus assignments (SDA/SCL, SPI0) are fixed by hardware — there's no meaningful 
 
 Split into what's actually on hand (**Phase 1**) and what's still pending (**Phase 2**) — Phase 2 pins are pre-reserved so adding them later is a plug-in, not a redesign.
 
+**⚠ Pending reconciliation (2026-08-17):** photos of the actual build (IMG_0445 "not included", IMG_0447 "the setup") show the real assembly has trimmed scope from the table below — PIR, relay, joystick, TEMT6000, both IR modules, and the DS18B20 probe all appear to have been left out. Install got hard, which is part of the point — dead ends are iteration, not failure — but the table below hasn't been reconciled against what's actually wired yet. Treat GPIO/pin assignments here as the *plan*, not yet confirmed *as-built*, until that reconciliation happens.
+
 ## Phase 1 — on hand, wire now
 
 Ultrasonic (HC-SR04) dropped — 5V echo pin straight into a GPIO input, not worth the risk.

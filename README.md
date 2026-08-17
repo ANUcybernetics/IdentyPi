@@ -55,10 +55,23 @@ The usual setup is inverted: instead of a human wiring carefully and documenting
 - **[WIRING.md](WIRING.md)** — the concrete pin-by-pin build plan. Also humans only, also never goes near the Pi.
 - **[PI.md](PI.md)** — the only document the machine gets: the task, the diary protocol, and the ask-a-human rule. Spoiler-free by design; it goes on the Pi as its `CLAUDE.md`.
 
+## Bootstrapping — how the agent actually gets in
+
+Decided 2026-08-17. No new hardware needed — reuses **gen**, an existing Pi on the network that's already reachable over SSH.
+
+1. **One human-touch step on IdentyPi itself**: attach a keyboard briefly (the monitor's already part of the rig), enable SSH via `raspi-config`, unplug the keyboard. Never touched again after this.
+2. **Physical link**: an Ethernet cable straight from IdentyPi into gen's spare port (`eth0`). No Wi-Fi credentials need to be typed into IdentyPi at all.
+3. **gen is the bridge**: `eth0` on gen runs in NetworkManager's "shared" mode — gen hands IdentyPi a DHCP lease, NATs it out through gen's own Wi-Fi for internet access (apt/npm/Claude Code installs), and is the only route in or out. IdentyPi never touches the main household LAN.
+4. **Access from the controlling machine**: `ssh -J gen pi@<identypi-address>` — gen as an SSH jump host, found via its DHCP lease once plugged in.
+5. **Self-install runs through that link**: Claude Code, I2C/SPI/camera enabled, `PI.md` dropped in as `CLAUDE.md`, diary repo initialised — all without the installing instance probing GPIO or I2C itself (no spoilers in its own shell history).
+6. **Auth is the one remaining human step**: `claude setup-token` from a machine already logged in, or one interactive login directly on IdentyPi.
+
+Nice side effect of routing through gen rather than the main LAN: the network isolation we'd talked about as a nice-to-have (keeping IdentyPi from wandering the household network while it's busy discovering what it's connected to) falls out of this for free.
+
 ## Build-day checklist
 
 - [ ] Pi flashed, on network, SSH enabled
-- [ ] A remote machine for the agent to access the pi
+- [x] A remote machine for the agent to access the pi — **gen**, via its `eth0` bridge (see Bootstrapping above)
 - [ ] Sensors wired quasi-randomly (3.3V discipline on GPIO inputs — the one mistake that ends the experiment rather than making it interesting)
 - [ ] Pi camera mounted, pointed back at some interesting components
     - Maybe we draw on a desk with labels and arrows pointing at the components so that Claude's image model can easily understand what's going on?
