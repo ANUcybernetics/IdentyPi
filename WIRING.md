@@ -27,15 +27,18 @@ No duplicate addresses in Phase 1, so everything sits directly on the bus — no
 
 ### SPI0 — epaper screen (WeAct 4.2")
 
-| Signal | GPIO (BCM) | Physical pin |
-|---|---|---|
-| MOSI | GPIO10 | 19 |
-| MISO | GPIO9 | 21 |
-| SCLK | GPIO11 | 23 |
-| CE0 (chip select) | GPIO8 | 24 |
-| DC (data/command) | GPIO12 | 32 |
-| RST | GPIO16 | 36 |
-| BUSY | GPIO20 | 38 |
+The board's own silkscreen labels these pins SCL/SDA/CS/D-C/RES/BUSY — that's the driver chip's alternate I2C-mode pin names, not actual I2C. It's SPI: SCL on the silkscreen is the SPI clock (SCLK), SDA is MOSI. Confirmed by full pin list (BUSY, RES, D/C, CS, SCL, SDA, GND, VCC).
+
+| Signal | Silkscreen label | GPIO (BCM) | Physical pin |
+|---|---|---|---|
+| MOSI | SDA | GPIO10 | 19 |
+| SCLK | SCL | GPIO11 | 23 |
+| CE0 (chip select) | CS | GPIO8 | 24 |
+| DC (data/command) | D/C | GPIO12 | 32 |
+| RST | RES | GPIO16 | 36 |
+| BUSY | BUSY | GPIO20 | 38 |
+
+No MISO — the panel is write-only from the host (BUSY reports status instead of a data-back line), so this board doesn't break one out at all. GPIO9 (pin 21), originally earmarked for it, is genuinely free.
 
 ### Bit-banged 3-wire — 8x8 LED matrix (MAX7219-style breakout)
 
@@ -125,6 +128,7 @@ Practical note: both cameras are **fixed-focus, not macro** — the Pi Camera v2
 - [x] Duinotech IR proximity sensor dropped — not actually on hand (GPIO25/pin 22 now free)
 - [x] DS18B20 1-Wire thermometer added to Phase 1 (GPIO7, last free general-purpose pin)
 - [x] Mux + 2x OLED (1.3", 1.5") + relay found, moved into Phase 1
+- [x] Epaper pin labels confirmed SPI (SCL/SDA silkscreen = SCLK/MOSI, not I2C); no MISO on this board, GPIO9 now free
 - [ ] Confirm actual I2C addresses of both OLEDs via `i2cdetect` (currently both routed through mux as a safe default)
 - [ ] Confirm relay active-high vs active-low before wiring
 - [ ] Disable serial console (`raspi-config`) to free GPIO14 for the relay trigger
