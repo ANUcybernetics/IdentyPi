@@ -48,11 +48,13 @@ The usual setup is inverted: instead of a human wiring carefully and documenting
 - **Any protocol, digital sensors generally** — output-to-output shorts (two things actively driving the same pin) are the generic risk. Annoying, heat-generating, rarely instantly fatal on 3.3V CMOS.
 - **The one true landmine: 5V-logic devices.** Most breakout boards from the Arduino world are 5V logic, not 3.3V-native — often true even when the datasheet buries it. A 5V signal on *any* Pi GPIO pin, on any line, in any protocol, is not something the agent can "discover gracefully" — it risks silently degrading or killing that GPIO, potentially taking a whole bank with it via the shared 3.3V rail. This is a build-time check, not a let-the-agent-find-out situation: **only 3.3V-native boards go on GPIO**, full stop, checked before power-on.
 - **The mains-relay landmine, a different category entirely — not currently in the build, but keep this if the relay ever goes back in.** A relay module rated for mains voltage (the SRD-03VDC-SL-C was considered) is unlike everything above, which is about component damage — a mains relay is about electrical safety if it's ever wired to a real mains-powered load. If it's ever added: the switched side stays disconnected or on a trivially safe low-voltage load for the entire agent-exploration phase, full stop. Mains switching for a real purpose is a deliberate, human-supervised job done separately, never something left for an undocumented agent to discover by triggering pins.
+- **Confirm identity and pin function against the part in hand, not against a first-glance guess.** Learned the hard way during the actual build — see [BUILD_LOG.md](BUILD_LOG.md)'s "Lesson learned" section. "Random" applies to *which pin*, never to *whether the plan matches physical reality*.
 
-## Three documents
+## Four documents
 
 - **README.md** (this file) — for humans only. It tells the whole plot, including everything the agent must discover for itself (the camera, the monitor, the traps). **Never let this file reach the Pi.**
 - **[WIRING.md](WIRING.md)** — the concrete pin-by-pin build plan. Also humans only, also never goes near the Pi.
+- **[BUILD_LOG.md](BUILD_LOG.md)** — photos and a chronological build record, including what got dropped and what was learned about wiring the hard way. Also humans only — the photos alone would spoil the whole thing.
 - **[PI.md](PI.md)** — the only document the machine gets: the task, the diary protocol, and the ask-a-human rule. Spoiler-free by design; it goes on the Pi as its `CLAUDE.md`.
 
 ## Bootstrapping — how the agent actually gets in
